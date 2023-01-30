@@ -1,0 +1,51 @@
+#LL
+#00 1 * * 1 php /var/www/report/index.php cli/Batch_report get_line_contract
+#05 1 * * * /opt/data_collection/ll/subscriber_count.py >> /var/log/report/subscriber_count.log 2>&1
+#10 1 * * 1 /opt/data_collection/ll/active_user_count.py >> /var/log/report/active_user_count.log 2>&1
+#20 1 * * * php /var/www/report/index.php cli/Batch_report get_tweet
+#30 1 * * * /opt/data_collection/ll/pic_data_collection.py >> /var/log/report/pic_data_collection.log 2>&1
+#00 2 * * 1 php /var/www/report/index.php cli/Batch_report import_active_user_unique
+#00 6 * * * php /var/www/report/index.php cli/Batch_report import_traffic_subscriber
+#30 6 * * 1 php /var/www/report/index.php cli/Batch_report make_static_html
+##40 6 * * * php /var/www/report/index.php cli/Batch_report summary_traffic_day
+#00 7 * * 1 /opt/data_collection/ll/sed_rp.sh
+
+# PodA
+#20 1 * * * /opt/data_collection/ll/poda_pic_data_collection.py >> /var/log/report/poda_pic_data_collection.log 2>&1
+#00 5 * * * php /var/www/report/index.php cli/Batch_report import_traffic_batch_poda
+
+# speed test
+# 30 6 * * 1 php /var/www/report/index.php cli/Batch_report make_static_html_speed
+
+# mysqldump
+00 08 10 * * /home/ranger/mysql_dump.sh
+
+# top_10_service_clear
+00 8 1 * * php /var/www/report_sora/index.php cli/Batch_report top_10_service_clear
+
+# Traffic INSERT
+00 09 1 * * /var/report/insert_traffic_data.sh >> /var/log/sora_traffic.log 2>&1
+
+# Traffic INSERT
+00 09 2 * * /var/report/insert_traffic_data.sh >> /var/log/sora_traffic.log 2>&1
+
+# Traffic INSERT
+#00 10 1 * * /var/report/insert_traffic_data_new.sh >> /var/log/sora_traffic_new.log 2>&1
+
+# Traffic INSERT
+#00 10 2 * * /var/report/insert_traffic_data_new.sh >> /var/log/sora_traffic_new.log 2>&1
+
+# Traffic Top10 INSERT
+05 10 1 * * /var/report/insert_traffic_data_newer.sh >> /var/log/sora_traffic_newer.log 2>&1
+
+# Traffic Top10 INSERT
+05 10 2  * * /var/report/insert_traffic_data_newer.sh >> /var/log/sora_traffic_newer.log 2>&1
+
+# Get Speed Test Results
+00 11 1 * * /home/ec2-user/sp.sh >> /var/log/get_sp_data.log 2>&1
+
+# Insert Speed Test Results
+00 12 1 * * php /var/www/report_sora/index.php cli/Batch_report get_speed_test_results
+
+# Insert Active users
+00 13 1 * * php /var/www/report_sora/index.php cli/Batch_report get_active_user_results
