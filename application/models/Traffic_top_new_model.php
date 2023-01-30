@@ -20,13 +20,13 @@ class Traffic_top_new_model extends CI_Model
 
     public function edit_service_top()
     {
-        $sql = "DROP TABLE IF EXISTS t_traffic_top_new_last;";
+        $sql = "DROP TABLE IF EXISTS `t_traffic_top_new_last`";
         $this -> db -> query($sql);
 
-        $sql = "CREATE TABLE t_traffic_top_new_last LIKE t_traffic_top_new";
+        $sql = "CREATE TABLE `t_traffic_top_new_last` LIKE `t_traffic_top_new`";
         $this -> db -> query($sql);
 
-        $sql = "INSERT INTO t_traffic_top_new_last SELECT * FROM t_traffic_top_new";
+        $sql = "INSERT INTO `t_traffic_top_new_last` SELECT * FROM `t_traffic_top_new`";
         $this -> db -> query($sql);
 
         $sql = "TRUNCATE TABLE `t_traffic_top_new`";
