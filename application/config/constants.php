@@ -108,7 +108,7 @@ const PIPE_CODE = array(
 | その他グロバルパラメータ定義
 |--------------------------------------------------------------------------
  */
-const SITE_NAME = 'SORAシームレポート管理画面';
+const SITE_NAME = 'SORAシムレポート管理画面';
 const WEEK_NAME = array("日", "月", "火", "水", "木", "金", "土");
 const MENU_NAME_ARR = array(
     ''				=> '選択してください',

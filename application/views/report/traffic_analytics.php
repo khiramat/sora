@@ -240,9 +240,9 @@ $max_plot_line = $plotLineValue[0]->base_value + 15;
         lineChartServiceTop("service_line_new", "主要サービス単体のトラフィック使用量", "", "トラフィック（bps）", "bps", 1, 1000000, <?=$service_daily_data_new?>);
         AreaChart("service_area_new", "主要サービス全体の合計使用量", "", "トラフィック（bps）", "bps", <?=$service_daily_data_new?>);
         //接続者数推移
-        lineChartDaily("user_count_line_1", "接続者数推移", "", '接続者数（人）', 16000, 2000, <?=$user_count_data_mobile?>,'' , 4);
-        lineChartDaily("user_count_line_2", "接続者数推移", "", '接続者数（人）', 16000, 2000, <?=$user_count_data_route?>, '', 4);
-        lineChartDaily("user_count_line_3", "接続者数推移", "", '接続者数（人）', 16000, 2000, <?=$user_count_data_all?>, '', 4);
+        lineChartDaily("user_count_line_1", "接続者数推移", "", '接続者数（人）', 16000, 2000, <?=$user_count_data['mobile']?>);
+        lineChartDaily("user_count_line_2", "接続者数推移", "", '接続者数（人）', 16000, 2000, <?=$user_count_data['route']?>);
+        lineChartDaily("user_count_line_3", "接続者数推移", "", '接続者数（人）', 16000, 2000, <?=$user_count_data['all']?>);
     });
 
     $(function () {

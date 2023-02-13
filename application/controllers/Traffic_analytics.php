@@ -56,25 +56,10 @@ class Traffic_analytics extends CI_Controller
         //作業予定テキスト
         $jobs = $this->getJobScheduleText($this_month . '-01', date('Y-m-t'));
 
-        //@モバイルくん アクティブユーザ情報取得2021（LTE 3G 合算, 12時）
-        $user_count_data_mobile = $this->getActiveUserCountMobile();
+        //アクティブユーザ情報取得
+        $user_count_data = $this->getActiveUserCount();
 
-        $data_arr = array(
-            $user_count_data_mobile,
-        );
-        $user_count_data_mobile_result = json_encode($data_arr, JSON_NUMERIC_CHECK);
-
-        $user_count_data_route = $this->getActiveUserCountRoute();
-
-        //アクティブユーザ情報取得（LTE 3G 合算, 12時）
-        $user_count_data_all = $this->getActiveUserCountAll();
-
-        $data_arr2 = array(
-            $user_count_data_all,
-        );
-        $user_count_data_all_result = json_encode($data_arr2, JSON_NUMERIC_CHECK);
-
-        //アクティブユーザー数（LTE, 12時）
+        //総数アクティブユーザー数
         $active_user_count_datas = $this->getActiveUsersCount12($last_before_date, $edate);
 
         //最大アクティブユーザー数 LTE（月次）
@@ -114,9 +99,7 @@ class Traffic_analytics extends CI_Controller
             "traffic_data12_m" => $traffic_data12_m,
             "traffic_data12_r" => $traffic_data12_r,
             "active_user_count_datas" => $active_user_count_datas,
-            "user_count_data_mobile" => $user_count_data_mobile_result,
-            "user_count_data_route" => $user_count_data_route,
-            "user_count_data_all" => $user_count_data_all_result,
+            "user_count_data" => $user_count_data,
             "host_data" => $host_data,
             "box_plot_down_data" => $box_plot_down_data,
             "box_plot_up_data" => $box_plot_up_data,
@@ -257,85 +240,85 @@ class Traffic_analytics extends CI_Controller
     }
 
 
-    /**
+ /**
      *　接続者数データ取得
      */
-    public function getActiveUserCountMobile()
-    {
-        //帯域変更履歴件数取得
-        $this->load->model('Active_users_model');
-        $rows = $this->Active_users_model->get_max_data_daily_new();
+          public function getActiveUserCount()
+        {
+            $date_this_y = date("Y");
+            $date_last_y = date("Y", strtotime("-1 year"));
+            //帯域変更履歴件数取得
+            $this->load->model('Active_users_model');
+            $rows = $this->Active_users_model->get_max_data_daily_new();
+            $mobile_last_y = null;
+            $mobile_this_y = null;
 
-        //平均値の文字列
-        foreach ($rows as $row) {
-            if ($row['apn'] == 'mair.jp') {
-                $mobile .= $row["number"] . ",";
+            //平均値の文字列
+            foreach ($rows as $row) {
+                $data_year =  explode("-", $row['date'])[0];
+                if ($row['apn'] == 'mair.jp' && $data_year == $date_last_y) {
+                    $mobile_last_y .= $row["number"] . ",";
+                } else if($row['apn'] == 'mair.jp' && $data_year == $date_this_y){
+                    $mobile_this_y .= $row["number"] . ",";
+                } else if($row['apn'] == 'route7.jp' && $data_year == $date_last_y){
+                    $route_last_y .= $row["number"] . ",";
+                } else if($row['apn'] == 'route7.jp' && $data_year == $date_this_y){
+                    $route_this_y .= $row["number"] . ",";
+                }
             }
-        }
 
-        $mobile = substr($mobile, 0, -1);
+            $mobile_last_y = substr($mobile_last_y, 0, -1);
+            $mobile_this_y = substr($mobile_this_y, 0, -1);
+            $route_last_y = substr($route_last_y, 0, -1);
+            $route_this_y = substr($route_this_y, 0, -1);
 
-        $avg_in_last_year_array = explode(",", $mobile);
-        $Xi_ai_data_last_year = $this->createSeries('接続者数', '#0099ff', $avg_in_last_year_array);
+            $mobile_last_year_array = explode(",", $mobile_last_y);
+            $mobile_this_year_array = explode(",", $mobile_this_y);
+            $route_last_year_array = explode(",", $route_last_y);
+            $route_this_year_array = explode(",", $route_this_y);
 
-        return $Xi_ai_data_last_year;
-    }
-
-
-    /**
-     *　接続者数データ取得
-     */
-    public function getActiveUserCountRoute()
-    {
-
-        //帯域変更履歴件数取得
-        $this->load->model('Active_users_model');
-        $rows = $this->Active_users_model->get_max_data_daily_new();
-
-        //平均値の文字列
-        foreach ($rows as $row) {
-            if ($row['apn'] == 'route7.jp') {
-                $route .= $row["number"] . ",";
+           $ary_count = count($mobile_last_year_array);
+            $all_last_year_array = array();
+            $all_this_year_array = array();
+            for ($i = 0; $i < $ary_count; $i++){
+                $total_last = $mobile_last_year_array[$i] + $route_last_year_array[$i];
+                array_push($all_last_year_array, $total_last);
+                if($mobile_this_year_array[$i]){
+                    $total_this = $mobile_this_year_array[$i] + $route_this_year_array[$i];
+                    array_push($all_this_year_array, $total_this);
+                }
             }
+
+            $mobile_data_last_year = $this->createSeries($date_last_y." 接続者数", '#ff8800', $mobile_last_year_array);
+            $mobile_data_this_year = $this->createSeries($date_this_y." 接続者数", '#0099ff', $mobile_this_year_array);
+            $route_data_last_year = $this->createSeries($date_last_y." 接続者数", '#ff8800', $route_last_year_array);
+            $route_data_this_year = $this->createSeries($date_this_y." 接続者数", '#0099ff', $route_this_year_array);
+            $all_data_last_year = $this->createSeries($date_last_y." 接続者数", '#ff8800', $all_last_year_array);
+            $all_data_this_year = $this->createSeries($date_this_y." 接続者数", '#0099ff', $all_this_year_array);
+
+            $mobile_data_arr = array(
+                $mobile_data_last_year,
+                $mobile_data_this_year
+            );
+
+            $route_data_arr = array(
+                $route_data_last_year,
+                $route_data_this_year
+            );
+
+            $all_data_arr = array(
+                $all_data_last_year,
+                $all_data_this_year
+            );
+
+            $result['mobile'] = json_encode($mobile_data_arr, JSON_NUMERIC_CHECK);
+            $result['route'] = json_encode($route_data_arr, JSON_NUMERIC_CHECK);
+            $result['all'] = json_encode($all_data_arr, JSON_NUMERIC_CHECK);
+
+            return $result;
         }
 
-        $route = substr($route, 0, -1);
 
-
-        $avg_out_last_year_array = explode(",", $route);
-        $Xi_ao_data_last_year = $this->createSeries('接続者数', '#0099ff', $avg_out_last_year_array);
-
-        $data_arr = array(
-            $Xi_ao_data_last_year
-        );
-        $result = json_encode($data_arr, JSON_NUMERIC_CHECK);
-
-        return $result;
-    }
-
-    /**
-     *　接続者数データ取得
-     */
-    public function getActiveUserCountAll()
-    {
-
-        //帯域変更履歴件数取得
-        $this->load->model('Active_users_model');
-        $rows = $this->Active_users_model->get_max_data_daily_all();
-
-        //平均値の文字列
-        foreach ($rows as $row) {
-            $all .= $row["number"] . ",";
-        }
-
-        $all = substr($all, 0, -1);
-
-        $avg_out_last_year_array = explode(",", $all);
-        $Xi_ao_data_last_year = $this->createSeries('接続者数', '#0099ff', $avg_out_last_year_array);
-
-
-        return $Xi_ao_data_last_year;
-    }
 
 
     /**
