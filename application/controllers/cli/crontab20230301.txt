@@ -1,0 +1,27 @@
+# SORA Report
+# mysqldump
+00 08 10 * * /home/ranger/mysql_dump.sh
+
+# top_10_service_clear
+00 8 1 * * php /var/www/report_sora/index.php cli/Batch_report top_10_service_clear
+
+# Traffic INSERT
+00 09 1 * * /var/report/insert_traffic_data_new.sh >> /var/log/sora_traffic_new.log 2>&1
+
+# Traffic INSERT
+00 12 1 * * /var/report/insert_traffic_data_new.sh >> /var/log/sora_traffic_new.log 2>&1
+
+# Traffic Top10 INSERT
+00 10 1 * * /var/report/insert_traffic_data_newer.sh >> /var/log/sora_traffic_newer.log 2>&1
+
+# Traffic Top10 INSERT
+00 13 1  * * /var/report/insert_traffic_data_newer.sh >> /var/log/sora_traffic_newer.log 2>&1
+
+# Get Speed Test Results
+00 11 1 * * /home/ec2-user/sp.sh >> /var/log/get_sp_data.log 2>&1
+
+# Insert Speed Test Results
+00 12 1 * * php /var/www/report_sora/index.php cli/Batch_report get_speed_test_results
+
+# Insert Active users
+00 13 1 * * php /var/www/report_sora/index.php cli/Batch_report get_active_user_results
